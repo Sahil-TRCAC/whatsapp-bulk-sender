@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if campaign %}Edit Campaign{% else %}Create Campaign{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{% if campaign %}Edit Campaign{% else %}Create Campaign{% endif %}</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Campaign Name</label>
+                {{ form.name }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                {{ form.description }}
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Message Type</label>
+                <select name="message_type" class="form-select" id="messageType" onchange="toggleMessageFields()">
+                    <option value="text" {% if campaign.message_type == 'text' %}selected{% endif %}>Text Message</option>
+                    <option value="template" {% if campaign.message_type == 'template' %}selected{% endif %}>Template Message</option>
+                    <option value="media" {% if campaign.message_type == 'media' %}selected{% endif %}>Media Message</option>
+                </select>
+            </div>
+            
+            <div id="textField" class="message-field">
+                <div class="mb-3">
+                    <label class="form-label">Message Body</label>
+                    {{ form.message_body }}
+                </div>
+            </div>
+            
+            <div id="templateField" class="message-field" style="display:none;">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Template Name</label>
+                        {{ form.template_name }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Language</label>
+                        {{ form.template_language }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Components (JSON)</label>
+                    {{ form.message_body }}
+                    <small class="text-muted">Template components in JSON format</small>
+                </div>
+            </div>
+            
+            <div id="mediaField" class="message-field" style="display:none;">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Media Type</label>
+                        {{ form.media_type }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Media URL</label>
+                        {{ form.media_url }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Caption</label>
+                    {{ form.message_body }}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Select Contact Groups</label>
+                <div class="row">
+                    {% for group in groups %}
+                    <div class="col-md-4 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="contact_groups" value="{{ group.id }}" id="group{{ group.id }}"
+                                {% if campaign and group in campaign.contact_groups.all %}checked{% endif %}>
+                            <label class="form-check-label" for="group{{ group.id }}">{{ group.name }} ({{ group.contact_count }} contacts)</label>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <p class="text-muted">No groups available. <a href="{% url 'group_create' %}">Create one</a></p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Schedule (Optional)</label>
+                {{ form.schedule_time }}
+                <small class="text-muted">Leave empty to send immediately</small>
+            </div>
+            
+            <button type="submit" class="btn btn-wa">{% if campaign %}Update{% else %}Create{% endif %} Campaign</button>
+            <a href="{% url 'campaign_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleMessageFields() {
+    const type = document.getElementById('messageType').value;
+    document.getElementById('textField').style.display = type === 'text' ? 'block' : 'none';
+    document.getElementById('templateField').style.display = type === 'template' ? 'block' : 'none';
+    document.getElementById('mediaField').style.display = type === 'media' ? 'block' : 'none';
+}
+toggleMessageFields();
+</script>
+{% endblock %}

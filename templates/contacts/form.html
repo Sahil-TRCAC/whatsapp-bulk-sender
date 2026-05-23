@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if contact %}Edit Contact{% else %}Add Contact{% endif %} - WhatsApp Bulk Sender{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{% if contact %}Edit Contact{% else %}Add Contact{% endif %}</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Name</label>
+                    {{ form.name }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Phone Number</label>
+                    {{ form.phone }}
+                    <small class="text-muted">Include country code (e.g., +1234567890)</small>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tags</label>
+                {{ form.tags }}
+                <small class="text-muted">Comma separated (e.g., customer, vip)</small>
+            </div>
+            {% if groups %}
+            <div class="mb-3">
+                <label class="form-label">Groups</label>
+                <div class="row">
+                    {% for group in groups %}
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="groups" value="{{ group.id }}" id="group{{ group.id }}"
+                                {% if contact and group in contact.groups.all %}checked{% endif %}>
+                            <label class="form-check-label" for="group{{ group.id }}">{{ group.name }}</label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            <button type="submit" class="btn btn-wa">Save Contact</button>
+            <a href="{% url 'contact_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

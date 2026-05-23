@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ campaign.name }} - WhatsApp Bulk Sender{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ campaign.name }}</h1>
+        <p class="text-muted">{{ campaign.description|default:"No description" }}</p>
+    </div>
+    <div>
+        {% if campaign.status == 'draft' or campaign.status == 'failed' %}
+        <form method="post" action="{% url 'campaign_send' campaign.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-wa">
+                <i class="bi bi-send"></i> Send Campaign
+            </button>
+        </form>
+        {% endif %}
+        <a href="{% url 'campaign_list' %}" class="btn btn-outline-secondary">Back</a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="label">Status</div>
+            <div class="value"><span class="badge badge-status badge-{{ campaign.status }}">{{ campaign.get_status_display }}</span></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="label">Total Recipients</div>
+            <div class="value">{{ campaign.total_recipients }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="label">Sent</div>
+            <div class="value">{{ campaign.sent_count }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="label">Delivered</div>
+            <div class="value">{{ campaign.delivered_count }}</div>
+        </div>
+    </div>
+</div>
+
+{% if campaign.status == 'sending' or campaign.status == 'queued' %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Sending Progress</h5>
+        <div class="progress mb-3" style="height: 20px;">
+            <div class="progress-bar" role="progressbar" style="width: {{ campaign.progress_percentage }}%">
+                {{ campaign.progress_percentage }}%
+            </div>
+        </div>
+        <p class="text-muted mb-0">
+            {{ campaign.sent_count }} of {{ campaign.total_recipients }} messages sent
+        </p>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="card-title mb-0">Recipients</h5>
+            <a href="{% url 'export_campaign_report' campaign.id %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-download"></i> Export Report
+            </a>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Contact</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Sent At</th>
+                        <th>Delivered At</th>
+                        <th>Read At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in recipients %}
+                    <tr>
+                        <td>{{ r.contact.name }}</td>
+                        <td><code>{{ r.contact.phone }}</code></td>
+                        <td><span class="badge badge-status badge-{{ r.status }}">{{ r.get_status_display }}</span></td>
+                        <td>{{ r.sent_at|date:"M d, H:i" }}</td>
+                        <td>{{ r.delivered_at|date:"M d, H:i"|default:"-" }}</td>
+                        <td>{{ r.read_at|date:"M d, H:i"|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No recipients</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if recipients.has_other_pages %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if recipients.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ recipients.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">Page {{ recipients.number }} of {{ recipients.paginator.num_pages }}</span></li>
+                {% if recipients.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ recipients.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+{% if campaign.status == 'sending' %}
+<script>
+setInterval(function() {
+    fetch('{% url "campaign_progress" campaign.id %}')
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'completed' || data.status === 'failed') {
+                location.reload();
+            }
+        });
+}, 5000);
+</script>
+{% endif %}
+{% endblock %}

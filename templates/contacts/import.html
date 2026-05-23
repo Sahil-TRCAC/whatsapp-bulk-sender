@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Import Contacts - WhatsApp Bulk Sender{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Import Contacts</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <p class="text-muted mb-4">Upload a CSV or Excel file with your contacts. Required columns: <strong>name, phone</strong></p>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="form-label">Select File</label>
+                {{ form.file }}
+            </div>
+            
+            <div class="card bg-light mb-4">
+                <div class="card-body">
+                    <h6>Example CSV format:</h6>
+                    <pre class="mb-0">name,phone
+John Doe,+1234567890
+Jane Smith,+0987654321</pre>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-wa">Import Contacts</button>
+            <a href="{% url 'contact_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

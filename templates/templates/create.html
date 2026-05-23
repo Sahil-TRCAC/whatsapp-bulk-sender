@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Template - WhatsApp Bulk Sender{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Create Template</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <p class="text-muted mb-4">Create a local template. Note: Templates must be submitted to Meta for approval before use.</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Template Name</label>
+                    <input type="text" name="template_name" class="form-control" required placeholder="hello_world">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Language</label>
+                    <select name="language" class="form-select">
+                        <option value="en_US">English (US)</option>
+                        <option value="en_GB">English (UK)</option>
+                        <option value="es">Spanish</option>
+                        <option value="pt_BR">Portuguese (Brazil)</option>
+                        <option value="ar">Arabic</option>
+                        <option value="hi">Hindi</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Category</label>
+                <select name="category" class="form-select">
+                    <option value="MARKETING">Marketing</option>
+                    <option value="UTILITY">Utility</option>
+                    <option value="AUTHENTICATION">Authentication</option>
+                </select>
+            </div>
+            <hr>
+            <h5>Template Content</h5>
+            <div class="mb-3">
+                <label class="form-label">Header Text (Optional)</label>
+                <input type="text" name="header_text" class="form-control" placeholder="Welcome message">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Body Text</label>
+                <textarea name="body_text" class="form-control" rows="3" placeholder="Hello {{1}}, your code is {{2}}"></textarea>
+                <small class="text-muted">Use {{1}}, {{2}}, etc. for variables</small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Footer Text (Optional)</label>
+                <input type="text" name="footer_text" class="form-control" placeholder="Thank you">
+            </div>
+            <button type="submit" class="btn btn-wa">Create Template</button>
+            <a href="{% url 'template_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

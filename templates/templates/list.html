@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Templates - WhatsApp Bulk Sender{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Templates</h1>
+    <div>
+        <a href="{% url 'template_sync' %}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-repeat"></i> Sync from Meta
+        </a>
+        <a href="{% url 'template_create' %}" class="btn btn-wa">
+            <i class="bi bi-plus-lg"></i> Create Template
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="mb-4">
+            <div class="btn-group">
+                <a href="{% url 'template_list' %}" class="btn btn-sm btn-outline-secondary {% if not status_filter %}active{% endif %}">All</a>
+                <a href="?status=APPROVED" class="btn btn-sm btn-outline-secondary {% if status_filter == 'APPROVED' %}active{% endif %}">Approved</a>
+                <a href="?status=PENDING" class="btn btn-sm btn-outline-secondary {% if status_filter == 'PENDING' %}active{% endif %}">Pending</a>
+                <a href="?status=REJECTED" class="btn btn-sm btn-outline-secondary {% if status_filter == 'REJECTED' %}active{% endif %}">Rejected</a>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Template Name</th>
+                        <th>Language</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for template in templates %}
+                    <tr>
+                        <td>{{ template.template_name }}</td>
+                        <td>{{ template.language }}</td>
+                        <td>{{ template.get_category_display }}</td>
+                        <td><span class="badge bg-{% if template.status == 'APPROVED' %}success{% elif template.status == 'REJECTED' %}danger{% else %}warning{% endif %}">{{ template.status }}</span></td>
+                        <td>{{ template.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'template_detail' template.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                            <form method="post" action="{% url 'template_delete' template.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this template?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No templates found. <a href="{% url 'template_create' %}">Create one</a> or <a href="{% url 'template_sync' %}">sync from Meta</a>.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if templates.has_other_pages %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if templates.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ templates.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">Page {{ templates.number }} of {{ templates.paginator.num_pages }}</span></li>
+                {% if templates.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ templates.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

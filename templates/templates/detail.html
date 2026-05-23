@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ template.template_name }} - WhatsApp Bulk Sender{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{{ template.template_name }}</h1>
+    <a href="{% url 'template_list' %}" class="btn btn-outline-secondary">Back</a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Template Details</h5>
+                <table class="table">
+                    <tr>
+                        <th>Name:</th>
+                        <td>{{ template.template_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Language:</th>
+                        <td>{{ template.language }}</td>
+                    </tr>
+                    <tr>
+                        <th>Category:</th>
+                        <td>{{ template.get_category_display }}</td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td><span class="badge bg-{% if template.status == 'APPROVED' %}success{% elif template.status == 'REJECTED' %}danger{% else %}warning{% endif %}">{{ template.status }}</span></td>
+                    </tr>
+                    <tr>
+                        <th>Meta ID:</th>
+                        <td><code>{{ template.meta_template_id|default:"-" }}</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Components</h5>
+                <pre class="bg-light p-3 rounded">{{ template.components }}</pre>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Preview</h5>
+                <div class="bg-light p-3 rounded">
+                    <div style="background: white; border-radius: 10px; padding: 15px; max-width: 300px;">
+                        {% for comp in template.components %}
+                            {% if comp.type == 'header' %}
+                                <div class="fw-bold mb-2">{{ comp.parameters.0.text }}</div>
+                            {% elif comp.type == 'body' %}
+                                <div>{{ comp.parameters.0.text }}</div>
+                            {% elif comp.type == 'footer' %}
+                                <div class="text-muted small mt-2">{{ comp.parameters.0.text }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
