@@ -52,6 +52,8 @@ python manage.py runserver
 4. Copy **Phone Number ID**, **WABA ID**, and **Access Token**
 5. Paste into the app at **Settings** → **WhatsApp Configuration**
 
+> **Note:** Meta test tokens expire every 24 hours. When the API returns "Authentication Error", regenerate the token in the Meta Console and update it in Settings. Production tokens (after Business Verification) are permanent.
+
 ## Project Structure
 
 ```
